@@ -58,7 +58,6 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <!-- Sidebar -->
             <div class="col-md-2 sidebar p-0">
                 <div class="p-4 text-center border-bottom border-light">
                     <i class="fas fa-user-circle fa-4x mb-3"></i>
@@ -93,15 +92,16 @@
                     <a href="#" onclick="showSection('notifications')">
                         <i class="fas fa-bell me-2"></i> Notifications
                     </a>
+                    <a href="#" onclick="showSection('health')">
+                        <i class="fas fa-heartbeat me-2"></i> Health Tracker
+                    </a>
                     <a href="#" onclick="logout()">
                         <i class="fas fa-sign-out-alt me-2"></i> Logout
                     </a>
                 </nav>
             </div>
             
-            <!-- Main Content -->
             <div class="col-md-10 p-4">
-                <!-- Header -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h3><i class="fas fa-heartbeat me-2 text-success"></i>Patient Dashboard</h3>
                     <div class="d-flex align-items-center">
@@ -112,7 +112,6 @@
                     </div>
                 </div>
                 
-                <!-- Dashboard Section -->
                 <div id="dashboardSection">
                     <div class="row mb-4">
                         <div class="col-md-3">
@@ -179,7 +178,7 @@
                         <div class="col-md-6">
                             <div class="card-custom">
                                 <h5><i class="fas fa-bell me-2"></i>Notifications</h5>
-                                <div id="notifications">
+                                <div id="dashboardNotifications">
                                     <p class="text-muted">No new notifications</p>
                                 </div>
                             </div>
@@ -187,7 +186,6 @@
                     </div>
                 </div>
                 
-                <!-- Book Appointment Section -->
                 <div id="bookSection" style="display:none;">
                     <div class="card-custom">
                         <h4><i class="fas fa-calendar-plus me-2"></i>Book New Appointment</h4>
@@ -226,7 +224,6 @@
                     </div>
                 </div>
                 
-                <!-- Appointments Section -->
                 <div id="appointmentsSection" style="display:none;">
                     <div class="card-custom">
                         <h4><i class="fas fa-calendar-check me-2"></i>My Appointments</h4>
@@ -245,7 +242,6 @@
                     </div>
                 </div>
                 
-                <!-- Prescriptions Section -->
                 <div id="prescriptionsSection" style="display:none;">
                     <div class="card-custom">
                         <h4><i class="fas fa-prescription me-2"></i>My Prescriptions</h4>
@@ -253,7 +249,6 @@
                     </div>
                 </div>
                 
-                <!-- Medicines Section -->
                 <div id="medicinesSection" style="display:none;">
                     <div class="card-custom">
                         <h4><i class="fas fa-pills me-2"></i>Medicines</h4>
@@ -264,7 +259,6 @@
                     </div>
                 </div>
                 
-                <!-- Billing Section -->
                 <div id="billingSection" style="display:none;">
                     <div class="card-custom">
                         <h4><i class="fas fa-file-invoice-dollar me-2"></i>Billing & Payments</h4>
@@ -283,7 +277,6 @@
                     </div>
                 </div>
                 
-                <!-- Reports Section -->
                 <div id="reportsSection" style="display:none;">
                     <div class="card-custom">
                         <h4><i class="fas fa-file-medical-alt me-2"></i>Medical Reports</h4>
@@ -313,7 +306,6 @@
                     </div>
                 </div>
                 
-                <!-- Profile Section -->
                 <div id="profileSection" style="display:none;">
                     <div class="card-custom">
                         <h4><i class="fas fa-user-cog me-2"></i>My Profile</h4>
@@ -390,7 +382,6 @@
                     </div>
                 </div>
                 
-                <!-- Notifications Section -->
                 <div id="notificationsSection" style="display:none;">
                     <div class="card-custom">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -439,6 +430,117 @@
                         </div>
                     </div>
                 </div>
+                
+                <div id="healthSection" style="display:none;">
+                    <div class="card-custom">
+                        <h4><i class="fas fa-heartbeat me-2"></i>Health Tracker</h4>
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h4 class="mb-0" id="bmiValue">--</h4>
+                                            <small class="text-muted">BMI</small>
+                                        </div>
+                                        <div class="stat-icon bg-info text-white">
+                                            <i class="fas fa-weight"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h4 class="mb-0" id="bloodPressureValue">--</h4>
+                                            <small class="text-muted">Blood Pressure</small>
+                                        </div>
+                                        <div class="stat-icon bg-danger text-white">
+                                            <i class="fas fa-tint"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h4 class="mb-0" id="heartRateValue">--</h4>
+                                            <small class="text-muted">Heart Rate</small>
+                                        </div>
+                                        <div class="stat-icon bg-warning text-white">
+                                            <i class="fas fa-heart"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h4 class="mb-0" id="stepsValue">0</h4>
+                                            <small class="text-muted">Daily Steps</small>
+                                        </div>
+                                        <div class="stat-icon bg-success text-white">
+                                            <i class="fas fa-walking"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card-custom">
+                                    <h5><i class="fas fa-plus-circle me-2"></i>Log Health Data</h5>
+                                    <form id="healthLogForm">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Weight (kg)</label>
+                                                <input type="number" step="0.1" class="form-control" id="healthWeight" placeholder="e.g., 70">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Height (cm)</label>
+                                                <input type="number" class="form-control" id="healthHeight" placeholder="e.g., 170">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Blood Pressure</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="bpSystolic" placeholder="120">
+                                                    <span class="input-group-text">/</span>
+                                                    <input type="number" class="form-control" id="bpDiastolic" placeholder="80">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Heart Rate (bpm)</label>
+                                                <input type="number" class="form-control" id="healthHeartRate" placeholder="e.g., 72">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Daily Steps</label>
+                                            <input type="number" class="form-control" id="healthSteps" placeholder="e.g., 5000">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>Log Health Data
+                                        </button>
+                                    </form>
+                                    <div id="healthLogMessage"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card-custom">
+                                    <h5><i class="fas fa-history me-2"></i>Health History</h5>
+                                    <div id="healthHistory">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>Start logging your health data to see your history.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -456,7 +558,7 @@
         document.getElementById('patientId').textContent = userData.id || '-';
         
         function showSection(section) {
-            var sections = ['dashboard', 'book', 'appointments', 'prescriptions', 'medicines', 'billing', 'reports', 'profile', 'notifications'];
+            var sections = ['dashboard', 'book', 'appointments', 'prescriptions', 'medicines', 'billing', 'reports', 'profile', 'notifications', 'health'];
             for (var i = 0; i < sections.length; i++) {
                 document.getElementById(sections[i] + 'Section').style.display = 'none';
             }
@@ -467,13 +569,40 @@
             if (section === 'prescriptions') loadPrescriptions();
             if (section === 'billing') loadBilling();
             if (section === 'profile') loadProfile();
+            if (section === 'health') loadHealthTracker();
         }
         
         function loadProfile() {
-            // Load user data into profile form
             document.getElementById('profileFirstName').value = userData.first_name || '';
             document.getElementById('profileLastName').value = userData.last_name || '';
             document.getElementById('profileEmail').value = userData.email || '';
+        }
+        
+        function loadHealthTracker() {
+            var weight = parseFloat(document.getElementById('healthWeight').value) || 0;
+            var height = parseFloat(document.getElementById('healthHeight').value) || 0;
+            
+            if (weight > 0 && height > 0) {
+                var heightInMeters = height / 100;
+                var bmi = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+                document.getElementById('bmiValue').textContent = bmi;
+            }
+            
+            var systolic = document.getElementById('bpSystolic').value;
+            var diastolic = document.getElementById('bpDiastolic').value;
+            if (systolic && diastolic) {
+                document.getElementById('bloodPressureValue').textContent = systolic + '/' + diastolic;
+            }
+            
+            var heartRate = document.getElementById('healthHeartRate').value;
+            if (heartRate) {
+                document.getElementById('heartRateValue').textContent = heartRate;
+            }
+            
+            var steps = document.getElementById('healthSteps').value;
+            if (steps) {
+                document.getElementById('stepsValue').textContent = steps;
+            }
         }
         
         function markAllNotificationsRead() {
@@ -574,7 +703,6 @@
         }
         
         function showBills(status) {
-            // Filter bills by status
             loadBilling();
         }
         
@@ -736,6 +864,21 @@
             } catch (error) {
                 messageDiv.innerHTML = '<div class="alert alert-danger mt-3">Error: ' + error.message + '</div>';
             }
+        });
+        
+        document.getElementById('healthLogForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var messageDiv = document.getElementById('healthLogMessage');
+            
+            loadHealthTracker();
+            
+            messageDiv.innerHTML = '<div class="alert alert-success mt-3"><i class="fas fa-check-circle me-2"></i>Health data logged successfully!</div>';
+        });
+        
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var messageDiv = document.getElementById('profileMessage');
+            messageDiv.innerHTML = '<div class="alert alert-success mt-3"><i class="fas fa-check-circle me-2"></i>Profile updated successfully!</div>';
         });
         
         loadPatientDashboard();
