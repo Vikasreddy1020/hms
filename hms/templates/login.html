@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Hospital Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-width: 450px;
+            width: 100%;
+        }
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .login-header h2 { margin: 0; font-size: 28px; }
+        .login-header i { font-size: 50px; margin-bottom: 10px; }
+        .login-body { padding: 40px; }
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 600;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        .btn-login:hover { transform: translateY(-2px); }
+        .toggle-link { color: #667eea; cursor: pointer; text-decoration: none; }
+        .toggle-link:hover { text-decoration: underline; }
+        .register-fields { display: none; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <i class="fas fa-hospital-user"></i>
+            <h2>Hospital Management</h2>
+            <p class="mb-0">Welcome back!</p>
+        </div>
+        <div class="login-body">
+            <div id="messageArea"></div>
+            <form id="authForm">
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" required>
+                </div>
+                <div class="register-fields" id="registerFields">
+                    <div class="mb-3">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">I am a</label>
+                        <select class="form-select" id="role">
+                            <option value="patient">Patient</option>
+                            <option value="doctor">Doctor</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirmPassword">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-login" id="submitBtn">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </button>
+            </form>
+            <div class="text-center mt-3">
+                <span id="toggleText">Don't have an account?</span>
+                <a class="toggle-link ms-1" id="toggleAuth">Register here</a>
+            </div>
+            <div class="text-center mt-3">
+                <a href="/" class="text-muted"><i class="fas fa-home me-1"></i>Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var isLoginMode = true;
+        
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            var registerFields = document.getElementById('registerFields');
+            var submitBtn = document.getElementById('submitBtn');
+            var toggleText = document.getElementById('toggleText');
+            var toggleLink = document.getElementById('toggleAuth');
+            
+            if (isLoginMode) {
+                registerFields.style.display = 'none';
+                submitBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Login';
+                toggleText.textContent = "Don't have an account?";
+                toggleLink.textContent = "Register here";
+            } else {
+                registerFields.style.display = 'block';
+                submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Register';
+                toggleText.textContent = "Already have an account?";
+                toggleLink.textContent = "Login here";
+            }
+        }
+        
+        document.getElementById('toggleAuth').addEventListener('click', toggleAuthMode);
+        
+        document.getElementById('authForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+            var messageArea = document.getElementById('messageArea');
+            
+            var endpoint = isLoginMode ? '/api/accounts/login/' : '/api/accounts/register/';
+            var body;
+            
+            if (isLoginMode) {
+                body = JSON.stringify({ username: username, password: password });
+            } else {
+                body = JSON.stringify({
+                    username: username,
+                    password: password,
+                    password_confirm: document.getElementById('confirmPassword').value,
+                    first_name: document.getElementById('firstName').value,
+                    last_name: document.getElementById('lastName').value,
+                    email: document.getElementById('email').value,
+                    role: document.getElementById('role').value
+                });
+            }
+            
+            try {
+                var response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: body
+                });
+                
+                var data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('access_token', data.access);
+                    localStorage.setItem('user_data', JSON.stringify(data.user));
+                    
+                    // Redirect based on role
+                    var user = data.user;
+                    if (user.role === 'doctor') {
+                        window.location.href = '/doctor-dashboard/';
+                    } else if (user.role === 'admin') {
+                        window.location.href = '/admin-dashboard/';
+                    } else {
+                        window.location.href = '/patient-dashboard/';
+                    }
+                } else {
+                    messageArea.innerHTML = '<div class="alert alert-danger">' + (data.detail || JSON.stringify(data)) + '</div>';
+                }
+            } catch (error) {
+                messageArea.innerHTML = '<div class="alert alert-danger">Error: ' + error.message + '</div>';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 text-center mb-5">
+        <h1 class="display-4">🏥 Hospital Management System</h1>
+        <p class="lead">Manage appointments, prescriptions, and billing with ease</p>
+    </div>
+</div>
+
+<!-- Authentication Section -->
+<div class="row mb-5">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">🔐 Login / Register</h4>
+                <form id="authForm">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="username" placeholder="Username" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" class="form-control" id="password" placeholder="Password" required>
+                    </div>
+                    <div class="mb-3" id="confirmPasswordDiv" style="display:none;">
+                        <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password">
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="firstName" placeholder="First Name">
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="lastName" placeholder="Last Name">
+                    </div>
+                    <div class="mb-3">
+                        <input type="email" class="form-control" id="email" placeholder="Email">
+                    </div>
+                    <div class="mb-3">
+                        <select class="form-select" id="role">
+                            <option value="patient">Patient</option>
+                            <option value="doctor">Doctor</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="loginBtn">Login</button>
+                    <button type="button" class="btn btn-secondary" id="toggleAuth">Switch to Register</button>
+                </form>
+                <div id="authMessage" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Doctors List Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="card-title mb-0">👨‍⚕️ Our Doctors</h4>
+                    <button class="btn btn-primary btn-sm" onclick="loadDoctors()">🔄 Refresh</button>
+                </div>
+                <div id="doctorsList" class="row">
+                    <div class="col-12 text-center text-muted">
+                        <p>Please login to view doctors</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Appointments Section -->
+<div class="row mb-5" id="appointmentsSection" style="display:none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">📅 Book Appointment</h4>
+                <form id="appointmentForm">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <select class="form-select" id="appointmentDoctor" required>
+                                <option value="">Select Doctor</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <input type="datetime-local" class="form-control" id="appointmentDate" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <input type="text" class="form-control" id="appointmentReason" placeholder="Reason for visit" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">Book Appointment</button>
+                </form>
+                <div id="appointmentMessage" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- My Appointments Section -->
+<div class="row mb-5" id="myAppointmentsSection" style="display:none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">📋 My Appointments</h4>
+                <div id="myAppointmentsList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var isLoginMode = true;
+var accessToken = localStorage.getItem('access_token');
+
+function toggleAuthMode() {
+    isLoginMode = !isLoginMode;
+    document.getElementById('loginBtn').textContent = isLoginMode ? 'Login' : 'Register';
+    document.getElementById('toggleAuth').textContent = isLoginMode ? 'Switch to Register' : 'Switch to Login';
+    document.getElementById('confirmPasswordDiv').style.display = isLoginMode ? 'none' : 'block';
+    document.getElementById('firstName').style.display = isLoginMode ? 'none' : 'block';
+    document.getElementById('lastName').style.display = isLoginMode ? 'none' : 'block';
+    document.getElementById('email').style.display = isLoginMode ? 'none' : 'block';
+    document.getElementById('role').style.display = isLoginMode ? 'none' : 'block';
+}
+
+document.getElementById('toggleAuth').addEventListener('click', toggleAuthMode);
+
+async function handleAuth(e) {
+    e.preventDefault();
+    var username = document.getElementById('username').value;
+    var password = document.getElementById('password').value;
+    var messageDiv = document.getElementById('authMessage');
+    
+    var endpoint = isLoginMode ? '/api/accounts/login/' : '/api/accounts/register/';
+    var body = isLoginMode 
+        ? { username: username, password: password }
+        : {
+            username: username,
+            password: password,
+            password_confirm: document.getElementById('confirmPassword').value,
+            first_name: document.getElementById('firstName').value,
+            last_name: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            role: document.getElementById('role').value
+          };
+    
+    try {
+        var response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        
+        var data = await response.json();
+        
+        if (response.ok) {
+            accessToken = data.access;
+            localStorage.setItem('access_token', accessToken);
+            localStorage.setItem('user_data', JSON.stringify(data.user));
+            
+            // Get user role and redirect to appropriate dashboard
+            var user = data.user;
+            var userRole = user.role;
+            
+            if (userRole === 'doctor') {
+                window.location.href = '/doctor-dashboard/';
+            } else if (userRole === 'admin') {
+                window.location.href = '/admin-dashboard/';
+            } else {
+                window.location.href = '/patient-dashboard/';
+            }
+        } else {
+            messageDiv.innerHTML = '<div class="alert alert-danger">' + (data.detail || JSON.stringify(data)) + '</div>';
+        }
+    } catch (error) {
+        messageDiv.innerHTML = '<div class="alert alert-danger">Error: ' + error.message + '</div>';
+    }
+}
+
+document.getElementById('authForm').addEventListener('submit', handleAuth);
+
+async function loadDoctors() {
+    var doctorsList = document.getElementById('doctorsList');
+    var appointmentDoctor = document.getElementById('appointmentDoctor');
+    
+    var headers = {};
+    if (accessToken) {
+        headers['Authorization'] = 'Bearer ' + accessToken;
+    }
+    
+    try {
+        var response = await fetch('/api/accounts/doctors/', {
+            headers: headers
+        });
+        
+        if (response.ok) {
+            var doctors = await response.json();
+            var html = '';
+            var options = '<option value="">Select Doctor</option>';
+            
+            for (var i = 0; i < doctors.length; i++) {
+                var doctor = doctors[i];
+                var firstName = doctor.user ? doctor.user.first_name : '';
+                var lastName = doctor.user ? doctor.user.last_name : '';
+                html += '<div class="col-md-4 mb-3">' +
+                    '<div class="card endpoint-card h-100">' +
+                        '<div class="card-body">' +
+                            '<h5 class="card-title">Dr. ' + firstName + ' ' + lastName + '</h5>' +
+                            '<p class="card-text">' +
+                                '<strong>Specialization:</strong> ' + doctor.specialization + '<br>' +
+                                '<strong>Experience:</strong> ' + doctor.experience_years + ' years<br>' +
+                                '<strong>Fee:</strong> $' + doctor.consultation_fee +
+                            '</p>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+                options += '<option value="' + doctor.id + '">Dr. ' + firstName + ' ' + lastName + ' - ' + doctor.specialization + '</option>';
+            }
+            
+            doctorsList.innerHTML = html || '<div class="col-12 text-center text-muted"><p>No doctors available</p></div>';
+            if (appointmentDoctor) {
+                appointmentDoctor.innerHTML = options;
+            }
+        } else if (response.status === 401) {
+            doctorsList.innerHTML = '<div class="col-12 text-center text-muted"><p>Please login to view doctors</p></div>';
+        }
+    } catch (error) {
+        doctorsList.innerHTML = '<div class="col-12 text-center text-danger"><p>Error loading doctors: ' + error.message + '</p></div>';
+    }
+}
+
+async function loadMyAppointments() {
+    var appointmentsList = document.getElementById('myAppointmentsList');
+    
+    try {
+        var response = await fetch('/api/appointments/my-appointments/', {
+            headers: { 'Authorization': 'Bearer ' + accessToken }
+        });
+        
+        if (response.ok) {
+            var appointments = await response.json();
+            var html = '<table class="table table-striped"><thead><tr><th>Date</th><th>Doctor</th><th>Status</th><th>Reason</th></tr></thead><tbody>';
+            
+            for (var i = 0; i < appointments.length; i++) {
+                var apt = appointments[i];
+                var statusClass = 'warning';
+                if (apt.status === 'completed') statusClass = 'success';
+                if (apt.status === 'cancelled') statusClass = 'danger';
+                
+                html += '<tr>' +
+                    '<td>' + new Date(apt.appointment_date).toLocaleString() + '</td>' +
+                    '<td>Dr. ' + apt.doctor_name + '</td>' +
+                    '<td><span class="badge bg-' + statusClass + '">' + apt.status + '</span></td>' +
+                    '<td>' + apt.reason + '</td>' +
+                '</tr>';
+            }
+            
+            html += '</tbody></table>';
+            appointmentsList.innerHTML = html || '<p>No appointments found</p>';
+        }
+    } catch (error) {
+        appointmentsList.innerHTML = '<p class="text-danger">Error loading appointments</p>';
+    }
+}
+
+async function bookAppointment(e) {
+    e.preventDefault();
+    var messageDiv = document.getElementById('appointmentMessage');
+    
+    var appointmentData = {
+        doctor: document.getElementById('appointmentDoctor').value,
+        appointment_date: document.getElementById('appointmentDate').value,
+        reason: document.getElementById('appointmentReason').value
+    };
+    
+    try {
+        var response = await fetch('/api/appointments/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + accessToken
+            },
+            body: JSON.stringify(appointmentData)
+        });
+        
+        var data = await response.json();
+        
+        if (response.ok) {
+            messageDiv.innerHTML = '<div class="alert alert-success">Appointment booked successfully!</div>';
+            loadMyAppointments();
+            document.getElementById('appointmentForm').reset();
+        } else {
+            messageDiv.innerHTML = '<div class="alert alert-danger">' + JSON.stringify(data) + '</div>';
+        }
+    } catch (error) {
+        messageDiv.innerHTML = '<div class="alert alert-danger">Error: ' + error.message + '</div>';
+    }
+}
+
+document.getElementById('appointmentForm').addEventListener('submit', bookAppointment);
+
+// Initial load
+loadDoctors();
+</script>
+{% endblock %}

@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - HMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #f5f7fa; }
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #8e44ad 0%, #9b59b6 100%);
+            color: white;
+        }
+        .sidebar a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            padding: 15px 20px;
+            display: block;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: rgba(255,255,255,0.2);
+            border-left-color: white;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .card-custom {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+        }
+        .badge-users { background: #3498db; }
+        .badge-doctors { background: #27ae60; }
+        .badge-patients { background: #e67e22; }
+        .badge-appointments { background: #9b59b6; }
+        .badge-revenue { background: #f39c12; }
+        .table-custom th {
+            background: #f8f9fa;
+            border-top: none;
+        }
+        .status-active { color: #27ae60; }
+        .status-inactive { color: #e74c3c; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar p-0">
+                <div class="p-4 text-center border-bottom border-light">
+                    <i class="fas fa-user-shield fa-4x mb-3"></i>
+                    <h6>Admin Panel</h6>
+                    <small>Hospital Management</small>
+                </div>
+                <nav>
+                    <a href="#" class="active" onclick="showSection('dashboard')">
+                        <i class="fas fa-home me-2"></i> Dashboard
+                    </a>
+                    <a href="#" onclick="showSection('users')">
+                        <i class="fas fa-users me-2"></i> User Management
+                    </a>
+                    <a href="#" onclick="showSection('doctors')">
+                        <i class="fas fa-user-md me-2"></i> Doctor Management
+                    </a>
+                    <a href="#" onclick="showSection('patients')">
+                        <i class="fas fa-user-injured me-2"></i> Patient Management
+                    </a>
+                    <a href="#" onclick="showSection('appointments')">
+                        <i class="fas fa-calendar me-2"></i> Appointments
+                    </a>
+                    <a href="#" onclick="showSection('billing')">
+                        <i class="fas fa-file-invoice-dollar me-2"></i> Billing & Revenue
+                    </a>
+                    <a href="#" onclick="showSection('reports')">
+                        <i class="fas fa-chart-bar me-2"></i> Reports
+                    </a>
+                    <a href="#" onclick="showSection('settings')">
+                        <i class="fas fa-cogs me-2"></i> Settings
+                    </a>
+                    <a href="#" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </a>
+                </nav>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3><i class="fas fa-shield-alt me-2 text-purple"></i>Admin Dashboard</h3>
+                    <div class="d-flex align-items-center">
+                        <span class="me-3">Welcome, <strong><span id="adminName">Admin</span></strong></span>
+                        <button class="btn btn-sm btn-outline-dark" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Dashboard Section -->
+                <div id="dashboardSection">
+                    <div class="row mb-4">
+                        <div class="col-md-2">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-0" id="totalUsers">0</h4>
+                                        <small class="text-muted">Total Users</small>
+                                    </div>
+                                    <div class="stat-icon bg-primary text-white">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-0" id="totalDoctors">0</h4>
+                                        <small class="text-muted">Doctors</small>
+                                    </div>
+                                    <div class="stat-icon bg-success text-white">
+                                        <i class="fas fa-user-md"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-0" id="totalPatients">0</h4>
+                                        <small class="text-muted">Patients</small>
+                                    </div>
+                                    <div class="stat-icon bg-warning text-white">
+                                        <i class="fas fa-user-injured"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-0" id="totalAppointments">0</h4>
+                                        <small class="text-muted">Appointments</small>
+                                    </div>
+                                    <div class="stat-icon bg-info text-white">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-0" id="totalRevenue">$0</h4>
+                                        <small class="text-muted">Revenue</small>
+                                    </div>
+                                    <div class="stat-icon bg-success text-white">
+                                        <i class="fas fa-dollar-sign"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-0" id="pendingPayments">$0</h4>
+                                        <small class="text-muted">Pending</small>
+                                    </div>
+                                    <div class="stat-icon bg-danger text-white">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card-custom">
+                                <h5><i class="fas fa-chart-pie me-2"></i>Appointments by Status</h5>
+                                <div id="appointmentsByStatus"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card-custom">
+                                <h5><i class="fas fa-star me-2"></i>Top Doctors</h5>
+                                <div id="topDoctors"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card-custom">
+                                <h5><i class="fas fa-clock me-2"></i>Recent Appointments</h5>
+                                <div id="recentAppointments"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Users Section -->
+                <div id="usersSection" style="display:none;">
+                    <div class="card-custom">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4><i class="fas fa-users me-2"></i>User Management</h4>
+                            <button class="btn btn-primary" onclick="showAddUserModal()">
+                                <i class="fas fa-plus me-2"></i>Add User
+                            </button>
+                        </div>
+                        <ul class="nav nav-tabs mb-3">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#" onclick="filterUsers('all')">All Users</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="filterUsers('doctors')">Doctors</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="filterUsers('patients')">Patients</a>
+                            </li>
+                        </ul>
+                        <div id="usersList"></div>
+                    </div>
+                </div>
+                
+                <!-- Doctors Section -->
+                <div id="doctorsSection" style="display:none;">
+                    <div class="card-custom">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4><i class="fas fa-user-md me-2"></i>Doctor Management</h4>
+                            <button class="btn btn-primary" onclick="showAddDoctorModal()">
+                                <i class="fas fa-plus me-2"></i>Add Doctor
+                            </button>
+                        </div>
+                        <div id="doctorsList"></div>
+                    </div>
+                </div>
+                
+                <!-- Patients Section -->
+                <div id="patientsSection" style="display:none;">
+                    <div class="card-custom">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4><i class="fas fa-user-injured me-2"></i>Patient Management</h4>
+                            <div class="input-group" style="max-width: 300px;">
+                                <input type="text" class="form-control" id="searchPatient" placeholder="Search patients...">
+                                <button class="btn btn-outline-secondary" onclick="searchPatients()">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="patientsList"></div>
+                    </div>
+                </div>
+                
+                <!-- Appointments Section -->
+                <div id="appointmentsSection" style="display:none;">
+                    <div class="card-custom">
+                        <h4><i class="fas fa-calendar me-2"></i>Appointment Management</h4>
+                        <ul class="nav nav-tabs mb-3">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#" onclick="filterAdminAppointments('all')">All</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="filterAdminAppointments('scheduled')">Scheduled</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="filterAdminAppointments('completed')">Completed</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="filterAdminAppointments('cancelled')">Cancelled</a>
+                            </li>
+                        </ul>
+                        <div id="adminAppointmentsList"></div>
+                    </div>
+                </div>
+                
+                <!-- Billing Section -->
+                <div id="billingSection" style="display:none;">
+                    <div class="card-custom">
+                        <h4><i class="fas fa-file-invoice-dollar me-2"></i>Billing & Revenue</h4>
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h3 id="billingTotal">$0</h3>
+                                        <p>Total Revenue</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <h3 id="billingPending">$0</h3>
+                                        <p>Pending Payments</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        <h3 id="billingPaid">$0</h3>
+                                        <p>Paid This Month</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h5>Recent Invoices</h5>
+                        <div id="invoicesList"></div>
+                    </div>
+                </div>
+                
+                <!-- Reports Section -->
+                <div id="reportsSection" style="display:none;">
+                    <div class="card-custom">
+                        <h4><i class="fas fa-chart-bar me-2"></i>Reports</h4>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center p-4 border rounded">
+                                    <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
+                                    <p>Revenue Report</p>
+                                    <button class="btn btn-sm btn-outline-primary">Download PDF</button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-4 border rounded">
+                                    <i class="fas fa-file-excel fa-3x text-success mb-3"></i>
+                                    <p>Appointment Report</p>
+                                    <button class="btn btn-sm btn-outline-primary">Download Excel</button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-4 border rounded">
+                                    <i class="fas fa-file-csv fa-3x text-info mb-3"></i>
+                                    <p>User Report</p>
+                                    <button class="btn btn-sm btn-outline-primary">Download CSV</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Settings Section -->
+                <div id="settingsSection" style="display:none;">
+                    <div class="card-custom">
+                        <h4><i class="fas fa-cogs me-2"></i>System Settings</h4>
+                        <form id="settingsForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>General Settings</h5>
+                                    <div class="mb-3">
+                                        <label class="form-label">Hospital Name</label>
+                                        <input type="text" class="form-control" id="hospitalName" value="HMS Hospital">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Contact Email</label>
+                                        <input type="email" class="form-control" id="contactEmail" value="admin@hms.com">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Contact Phone</label>
+                                        <input type="text" class="form-control" id="contactPhone" value="+1 234 567 890">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Appointment Settings</h5>
+                                    <div class="mb-3">
+                                        <label class="form-label">Default Appointment Duration (minutes)</label>
+                                        <input type="number" class="form-control" id="appointmentDuration" value="30">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Advance Booking Days</label>
+                                        <input type="number" class="form-control" id="advanceDays" value="30">
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                            <label class="form-check-label">Enable Email Notifications</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Settings
+                            </button>
+                        </form>
+                        <div id="settingsMessage"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var accessToken = localStorage.getItem('access_token');
+        var userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+        
+        if (!accessToken) {
+            window.location.href = '/login/';
+        }
+        
+        // Check if user is admin
+        if (userData.role !== 'admin') {
+            alert('Access denied. Admin only.');
+            window.location.href = '/';
+        }
+        
+        document.getElementById('adminName').textContent = (userData.first_name || '') + ' ' + (userData.last_name || '');
+        
+        function showSection(section) {
+            var sections = ['dashboard', 'users', 'doctors', 'patients', 'appointments', 'billing', 'reports', 'settings'];
+            for (var i = 0; i < sections.length; i++) {
+                document.getElementById(sections[i] + 'Section').style.display = 'none';
+            }
+            document.getElementById(section + 'Section').style.display = 'block';
+            
+            if (section === 'dashboard') loadAdminDashboard();
+            if (section === 'users') loadUsers();
+            if (section === 'doctors') loadDoctors();
+            if (section === 'patients') loadPatients();
+            if (section === 'appointments') loadAdminAppointments();
+            if (section === 'billing') loadBilling();
+        }
+        
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+        
+        async function loadAdminDashboard() {
+            try {
+                var response = await fetch('/api/dashboard/admin/', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                
+                if (response.ok) {
+                    var data = await response.json();
+                    
+                    document.getElementById('totalUsers').textContent = data.users.total || 0;
+                    document.getElementById('totalDoctors').textContent = data.users.doctors || 0;
+                    document.getElementById('totalPatients').textContent = data.users.patients || 0;
+                    document.getElementById('totalAppointments').textContent = data.appointments.total || 0;
+                    document.getElementById('totalRevenue').textContent = '$' + (data.revenue.total || 0);
+                    document.getElementById('pendingPayments').textContent = '$' + (data.revenue.pending || 0);
+                    
+                    // Render appointments by status
+                    var statusHtml = '<div class="d-flex flex-wrap gap-2">';
+                    if (data.appointments.by_status) {
+                        for (var i = 0; i < data.appointments.by_status.length; i++) {
+                            var s = data.appointments.by_status[i];
+                            statusHtml += '<span class="badge bg-secondary">' + s.status + ': ' + s.count + '</span>';
+                        }
+                    }
+                    statusHtml += '</div>';
+                    document.getElementById('appointmentsByStatus').innerHTML = statusHtml;
+                    
+                    // Render top doctors
+                    var doctorsHtml = '<table class="table table-sm"><thead><tr><th>Doctor</th><th>Specialization</th><th>Appointments</th></tr></thead><tbody>';
+                    if (data.top_doctors) {
+                        for (var i = 0; i < data.top_doctors.length; i++) {
+                            var doc = data.top_doctors[i];
+                            doctorsHtml += '<tr><td>Dr. ' + (doc.doctor__user__first_name || '') + ' ' + (doc.doctor__user__last_name || '') + '</td><td>' + (doc.doctor__specialization || 'N/A') + '</td><td>' + doc.count + '</td></tr>';
+                        }
+                    }
+                    doctorsHtml += '</tbody></table>';
+                    document.getElementById('topDoctors').innerHTML = doctorsHtml || '<p class="text-muted">No data available</p>';
+                    
+                    // Recent appointments placeholder
+                    document.getElementById('recentAppointments').innerHTML = '<p class="text-muted">Loading recent appointments...</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        async function loadUsers() {
+            try {
+                var response = await fetch('/api/accounts/', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                
+                if (response.ok) {
+                    var users = await response.json();
+                    window.allUsers = users;
+                    renderUsers(users);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        function filterUsers(filter) {
+            var users = window.allUsers || [];
+            var filtered = users;
+            
+            if (filter === 'doctors') {
+                filtered = users.filter(function(u) { return u.role === 'doctor'; });
+            } else if (filter === 'patients') {
+                filtered = users.filter(function(u) { return u.role === 'patient'; });
+            }
+            
+            renderUsers(filtered);
+        }
+        
+        function renderUsers(users) {
+            var html = '<table class="table table-custom"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+            
+            for (var i = 0; i < users.length; i++) {
+                var u = users[i];
+                var roleBadge = 'badge-users';
+                if (u.role === 'doctor') roleBadge = 'badge-doctors';
+                if (u.role === 'patient') roleBadge = 'badge-patients';
+                
+                html += '<tr>' +
+                    '<td>' + u.id + '</td>' +
+                    '<td>' + (u.first_name || '') + ' ' + (u.last_name || '') + '</td>' +
+                    '<td>' + (u.email || 'N/A') + '</td>' +
+                    '<td><span class="badge ' + roleBadge + '">' + u.role + '</span></td>' +
+                    '<td><span class="status-active"><i class="fas fa-check-circle"></i> Active</span></td>' +
+                    '<td><button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button></td>' +
+                '</tr>';
+            }
+            
+            html += '</tbody></table>';
+            document.getElementById('usersList').innerHTML = html || '<p class="text-muted">No users found</p>';
+        }
+        
+        async function loadDoctors() {
+            try {
+                var response = await fetch('/api/accounts/doctors/', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                
+                if (response.ok) {
+                    var doctors = await response.json();
+                    renderDoctors(doctors);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        function renderDoctors(doctors) {
+            var html = '<table class="table table-custom"><thead><tr><th>ID</th><th>Name</th><th>Specialization</th><th>Experience</th><th>Fee</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+            
+            for (var i = 0; i < doctors.length; i++) {
+                var d = doctors[i];
+                var name = 'Dr. ' + (d.user ? d.user.first_name + ' ' + d.user.last_name : 'Unknown');
+                
+                html += '<tr>' +
+                    '<td>' + d.id + '</td>' +
+                    '<td>' + name + '</td>' +
+                    '<td>' + (d.specialization || 'General') + '</td>' +
+                    '<td>' + (d.experience_years || 0) + ' years</td>' +
+                    '<td>$' + (d.consultation_fee || 0) + '</td>' +
+                    '<td><span class="status-active"><i class="fas fa-check-circle"></i> Active</span></td>' +
+                    '<td><button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button></td>' +
+                '</tr>';
+            }
+            
+            html += '</tbody></table>';
+            document.getElementById('doctorsList').innerHTML = html || '<p class="text-muted">No doctors found</p>';
+        }
+        
+        async function loadPatients() {
+            try {
+                var response = await fetch('/api/accounts/patients/', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                
+                if (response.ok) {
+                    var patients = await response.json();
+                    renderPatients(patients);
+                }
+            } catch (error) {
+                document.getElementById('patientsList').innerHTML = '<p class="text-muted">No patients found</p>';
+            }
+        }
+        
+        function renderPatients(patients) {
+            var html = '<table class="table table-custom"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Blood Type</th><th>Actions</th></tr></thead><tbody>';
+            
+            for (var i = 0; i < patients.length; i++) {
+                var p = patients[i];
+                var name = p.user ? p.user.first_name + ' ' + p.user.last_name : 'Unknown';
+                
+                html += '<tr>' +
+                    '<td>' + p.id + '</td>' +
+                    '<td>' + name + '</td>' +
+                    '<td>' + (p.user ? p.user.email : 'N/A') + '</td>' +
+                    '<td>' + (p.phone || 'N/A') + '</td>' +
+                    '<td>' + (p.blood_type || 'N/A') + '</td>' +
+                    '<td><button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button><button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button></td>' +
+                '</tr>';
+            }
+            
+            html += '</tbody></table>';
+            document.getElementById('patientsList').innerHTML = html || '<p class="text-muted">No patients found</p>';
+        }
+        
+        function searchPatients() {
+            var query = document.getElementById('searchPatient').value.toLowerCase();
+            var patients = window.allPatients || [];
+            var filtered = patients.filter(function(p) {
+                var name = p.user ? (p.user.first_name + ' ' + p.user.last_name).toLowerCase() : '';
+                return name.includes(query);
+            });
+            renderPatients(filtered);
+        }
+        
+        async function loadAdminAppointments() {
+            try {
+                var response = await fetch('/api/appointments/', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                
+                if (response.ok) {
+                    var appointments = await response.json();
+                    window.allAdminAppointments = appointments;
+                    renderAdminAppointments(appointments);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        function filterAdminAppointments(filter) {
+            var appointments = window.allAdminAppointments || [];
+            var filtered = appointments;
+            
+            if (filter !== 'all') {
+                filtered = appointments.filter(function(a) { return a.status === filter; });
+            }
+            
+            renderAdminAppointments(filtered);
+        }
+        
+        function renderAdminAppointments(appointments) {
+            var html = '<table class="table table-custom"><thead><tr><th>ID</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+            
+            for (var i = 0; i < appointments.length; i++) {
+                var a = appointments[i];
+                var statusClass = 'bg-warning';
+                if (a.status === 'completed') statusClass = 'bg-success';
+                if (a.status === 'cancelled') statusClass = 'bg-danger';
+                
+                html += '<tr>' +
+                    '<td>' + a.id + '</td>' +
+                    '<td>' + (a.patient_name || 'N/A') + '</td>' +
+                    '<td>Dr. ' + (a.doctor_name || 'N/A') + '</td>' +
+                    '<td>' + new Date(a.appointment_date).toLocaleString() + '</td>' +
+                    '<td><span class="badge ' + statusClass + '">' + a.status + '</span></td>' +
+                    '<td><button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button></td>' +
+                '</tr>';
+            }
+            
+            html += '</tbody></table>';
+            document.getElementById('adminAppointmentsList').innerHTML = html || '<p class="text-muted">No appointments found</p>';
+        }
+        
+        async function loadBilling() {
+            try {
+                var response = await fetch('/api/billing/invoices/', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                
+                if (response.ok) {
+                    var invoices = await response.json();
+                    renderBilling(invoices);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        function renderBilling(invoices) {
+            var total = 0, pending = 0, paid = 0;
+            
+            for (var i = 0; i < invoices.length; i++) {
+                var inv = invoices[i];
+                total += parseFloat(inv.total_amount || 0);
+                if (inv.status === 'pending') {
+                    pending += parseFloat(inv.total_amount || 0);
+                } else if (inv.status === 'paid') {
+                    paid += parseFloat(inv.total_amount || 0);
+                }
+            }
+            
+            document.getElementById('billingTotal').textContent = '$' + total.toFixed(2);
+            document.getElementById('billingPending').textContent = '$' + pending.toFixed(2);
+            document.getElementById('billingPaid').textContent = '$' + paid.toFixed(2);
+            
+            var html = '<table class="table table-custom"><thead><tr><th>Invoice #</th><th>Patient</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>';
+            
+            for (var i = 0; i < invoices.length; i++) {
+                var inv = invoices[i];
+                var statusClass = 'bg-warning';
+                if (inv.status === 'paid') statusClass = 'bg-success';
+                if (inv.status === 'overdue') statusClass = 'bg-danger';
+                
+                html += '<tr>' +
+                    '<td>' + (inv.invoice_number || '#' + inv.id) + '</td>' +
+                    '<td>' + (inv.patient_name || 'N/A') + '</td>' +
+                    '<td>$' + inv.total_amount + '</td>' +
+                    '<td><span class="badge ' + statusClass + '">' + inv.status + '</span></td>' +
+                    '<td>' + new Date(inv.created_at).toLocaleDateString() + '</td>' +
+                '</tr>';
+            }
+            
+            html += '</tbody></table>';
+            document.getElementById('invoicesList').innerHTML = html || '<p class="text-muted">No invoices found</p>';
+        }
+        
+        function showAddUserModal() {
+            alert('Add User modal would open here');
+        }
+        
+        function showAddDoctorModal() {
+            alert('Add Doctor modal would open here');
+        }
+        
+        document.getElementById('settingsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('settingsMessage').innerHTML = '<div class="alert alert-success mt-3">Settings saved successfully!</div>';
+        });
+        
+        // Initial load
+        loadAdminDashboard();
+    </script>
+</body>
+</html>

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - HMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #f5f7fa; }
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+        }
+        .sidebar a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            padding: 15px 20px;
+            display: block;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .card-custom {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar p-0">
+                <div class="p-4 text-center border-bottom border-secondary">
+                    <i class="fas fa-user-md fa-4x mb-3"></i>
+                    <h6>Dr. <span id="doctorName">Doctor</span></h6>
+                    <small id="specialization">General Medicine</small>
+                </div>
+                <nav>
+                    <a href="#" class="active" onclick="showSection('dashboard')">
+                        <i class="fas fa-home me-2"></i> Dashboard
+                    </a>
+                    <a href="#" onclick="showSection('appointments')">
+                        <i class="fas fa-calendar me-2"></i> Appointments
+                    </a>
+                    <a href="#" onclick="showSection('patients')">
+                        <i class="fas fa-users me-2"></i> Patients
+                    </a>
+                    <a href="#" onclick="showSection('prescriptions')">
+                        <i class="fas fa-prescription me-2"></i> Write Prescription
+                    </a>
+                    <a href="#" onclick="showSection('schedule')">
+                        <i class="fas fa-clock me-2"></i> My Schedule
+                    </a>
+                    <a href="#" onclick="showSection('earnings')">
+                        <i class="fas fa-dollar-sign me-2"></i> Earnings
+                    </a>
+                    <a href="#" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </a>
+                </nav>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3><i class="fas fa-stethoscope me-2"></i>Doctor Dashboard</h3>
+                    <div class="d-flex align-items-center">
+                        <span class="me-3">Welcome, <strong>Dr. <span id="headerDoctorName">Doctor</span></strong></span>
+                        <button class="btn btn-sm btn-outline-light" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Dashboard Section -->
+                <div id="dashboardSection">
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-0" id="todayAppts">0</h4>
+                                        <small class="text-muted">Today's Appointments</small>
+                                    </div>
+                                    <div class="stat-icon bg-primary text-white">
+                                        <i class="fas fa-calendar-day"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-0" id="totalPatients">0</h4>
+                                        <small class="text-muted">Total Patients</small>
+                                    </div>
+                                    <div class="stat-icon bg-success text-white">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-0" id="completedAppts">0</h4>
+                                        <small class="text-muted">Completed</small>
+                                    </div>
+                                    <div class="stat-icon bg-info text-white">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-0" id="pendingAppts">0</h4>
+                                        <small class="text-muted">Pending</small>
+                                    </div>
+                                    <div class="stat-icon bg-warning text-white">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card-custom">
+                                <h5><i class="fas fa-calendar me-2"></i>Today's Schedule</h5>
+                                <div id="todayAppointmentsList"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card-custom">
+                                <h5><i class="fas fa-chart-line me-2"></i>This Month Overview</h5>
+                                <div class="alert alert-info">
+                                    <h6>Total Patients: <span id="monthPatients">0</span></h6>
+                                    <h6>Completed: <span id="monthCompleted">0</span></h6>
+                                    <h6>Earnings: <span id="monthEarnings" class="text-success">$0</span></h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Appointments Section -->
+                <div id="appointmentsSection" style="display:none;">
+                    <div class="card-custom">
+                        <h4><i class="fas fa-calendar me-2"></i>All Appointments</h4>
+                        <ul class="nav nav-tabs mb-3">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#" onclick="filterAppointments('all')">All</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="filterAppointments('today')">Today</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="filterAppointments('upcoming')">Upcoming</a>
+                            </li>
+                        </ul>
+                        <div id="allAppointmentsList"></div>
+                    </div>
+                </div>
+                
+                <!-- Patients Section -->
+                <div id="patientsSection" style="display:none;">
+                    <div class="card-custom">
+                        <h4><i class="fas fa-users me-2"></i>My Patients</h4>
+                        <div id="patientsList"></div>
+                    </div>
+                </div>
+                
+                <!-- Prescriptions Section -->
+                <div id="prescriptionsSection" style="display:none;">
+                    <div class="card-custom">
+                        <h4><i class="fas fa-prescription me-2"></i>Write Prescription</h4>
+                        <form id="prescriptionForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Select Patient</label>
+                                    <select class="form-select" id="prescriptionPatient" required>
+                                        <option value="">Choose Patient...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Select Appointment</label>
+                                    <select class="form-select" id="prescriptionAppointment">
+                                        <option value="">Select Appointment...</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Symptoms</label>
+                                <textarea class="form-control" id="symptoms" rows="2" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Diagnosis</label>
+                                <textarea class="form-control" id="diagnosis" rows="2" required></textarea>
+                            </div>
+                            
+                            <h5>Medicines</h5>
+                            <div id="medicinesContainer">
+                                <div class="row mb-2 medicine-row">
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control" placeholder="Medicine Name" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="text" class="form-control" placeholder="Dosage" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select class="form-select">
+                                            <option value="1-0-0">Morning</option>
+                                            <option value="0-1-0">Afternoon</option>
+                                            <option value="0-0-1">Night</option>
+                                            <option value="1-1-1">3 Times</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="text" class="form-control" placeholder="Duration" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="text" class="form-control" placeholder="Instructions">
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-danger" onclick="removeMedicine(this)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary mb-3" onclick="addMedicine()">
+                                <i class="fas fa-plus me-1"></i> Add Medicine
+                            </button>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Additional Notes</label>
+                                <textarea class="form-control" id="prescriptionNotes" rows="2"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Follow-up Date</label>
+                                <input type="date" class="form-control" id="followUpDate">
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>Save Prescription
+                            </button>
+                        </form>
+                        <div id="prescriptionMessage"></div>
+                    </div>
+                </div>
+                
+                <!-- Schedule Section -->
+                <div id="scheduleSection" style="display:none;">
+                    <div class="card-custom">
+                        <h4><i class="fas fa-clock me-2"></i>My Schedule</h4>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>Manage your availability for appointments.
+                        </div>
+                        <form id="scheduleForm">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Day</label>
+                                    <select class="form-select" id="scheduleDay">
+                                        <option value="0">Monday</option>
+                                        <option value="1">Tuesday</option>
+                                        <option value="2">Wednesday</option>
+                                        <option value="3">Thursday</option>
+                                        <option value="4">Friday</option>
+                                        <option value="5">Saturday</option>
+                                        <option value="6">Sunday</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Start Time</label>
+                                    <input type="time" class="form-control" id="scheduleStart" value="09:00">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">End Time</label>
+                                    <input type="time" class="form-control" id="scheduleEnd" value="17:00">
+                                </div>
+                                <div class="col-md-2 mb-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">Add Slot</button>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="scheduleMessage"></div>
+                    </div>
+                </div>
+                
+                <!-- Earnings Section -->
+                <div id="earningsSection" style="display:none;">
+                    <div class="card-custom">
+                        <h4><i class="fas fa-dollar-sign me-2"></i>Earnings</h4>
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h3 id="totalEarnings">$0</h3>
+                                        <p>Total Earnings</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        <h3 id="monthEarningsCard">$0</h3>
+                                        <p>This Month</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <h3 id="pendingPayments">$0</h3>
+                                        <p>Pending</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h5>Recent Transactions</h5>
+                        <div id="transactionsList">
+                            <p class="text-muted">No transactions yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var accessToken = localStorage.getItem('access_token');
+        var userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+        
+        if (!accessToken) {
+            window.location.href = '/login/';
+        }
+        
+        document.getElementById('doctorName').textContent = userData.first_name || 'Doctor';
+        document.getElementById('headerDoctorName').textContent = userData.first_name || 'Doctor';
+        
+        function showSection(section) {
+            var sections = ['dashboard', 'appointments', 'patients', 'prescriptions', 'schedule', 'earnings'];
+            for (var i = 0; i < sections.length; i++) {
+                document.getElementById(sections[i] + 'Section').style.display = 'none';
+            }
+            document.getElementById(section + 'Section').style.display = 'block';
+            
+            if (section === 'appointments') loadAppointments();
+            if (section === 'patients') loadPatients();
+            if (section === 'prescriptions') loadPatientsForPrescription();
+            if (section === 'earnings') loadEarnings();
+        }
+        
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+        
+        async function loadDoctorDashboard() {
+            try {
+                var response = await fetch('/api/dashboard/doctor/', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                
+                if (response.ok) {
+                    var data = await response.json();
+                    document.getElementById('todayAppts').textContent = data.today_appointments || 0;
+                    document.getElementById('totalPatients').textContent = data.total_patients || 0;
+                    document.getElementById('completedAppts').textContent = data.completed_appointments || 0;
+                    document.getElementById('pendingAppts').textContent = data.upcoming_appointments ? data.upcoming_appointments.length : 0;
+                    document.getElementById('monthEarnings').textContent = '$' + (data.monthly_revenue || 0);
+                    document.getElementById('monthPatients').textContent = data.total_patients || 0;
+                    document.getElementById('monthCompleted').textContent = data.completed_appointments || 0;
+                    
+                    if (data.upcoming_appointments) {
+                        renderAppointments(data.upcoming_appointments, 'todayAppointmentsList');
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+            
+            loadAppointments();
+        }
+        
+        async function loadAppointments() {
+            try {
+                var response = await fetch('/api/appointments/', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                
+                if (response.ok) {
+                    var appointments = await response.json();
+                    window.allAppointments = appointments;
+                    renderAppointments(appointments, 'allAppointmentsList');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        function filterAppointments(filter) {
+            var appointments = window.allAppointments || [];
+            var today = new Date().toISOString().split('T')[0];
+            
+            var filtered = appointments;
+            if (filter === 'today') {
+                filtered = appointments.filter(function(a) { 
+                    return a.appointment_date.split('T')[0] === today; 
+                });
+            } else if (filter === 'upcoming') {
+                filtered = appointments.filter(function(a) { 
+                    return new Date(a.appointment_date) > new Date(); 
+                });
+            }
+            
+            renderAppointments(filtered, 'allAppointmentsList');
+        }
+        
+        async function loadPatients() {
+            try {
+                var response = await fetch('/api/appointments/', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                
+                if (response.ok) {
+                    var appointments = await response.json();
+                    var patientsMap = {};
+                    
+                    for (var i = 0; i < appointments.length; i++) {
+                        var apt = appointments[i];
+                        if (!patientsMap[apt.patient]) {
+                            patientsMap[apt.patient] = {
+                                id: apt.patient,
+                                name: apt.patient_name,
+                                last_visit: apt.appointment_date,
+                                appointments: 1
+                            };
+                        } else {
+                            patientsMap[apt.patient].appointments++;
+                        }
+                    }
+                    
+                    var patients = Object.values(patientsMap);
+                    renderPatients(patients);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        async function loadPatientsForPrescription() {
+            try {
+                var response = await fetch('/api/appointments/', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                
+                if (response.ok) {
+                    var appointments = await response.json();
+                    var select = document.getElementById('prescriptionPatient');
+                    select.innerHTML = '<option value="">Choose Patient...</option>';
+                    
+                    for (var i = 0; i < appointments.length; i++) {
+                        var apt = appointments[i];
+                        if (apt.status !== 'completed') {
+                            select.innerHTML += '<option value="' + apt.patient + '">' + apt.patient_name + ' - ' + apt.reason + '</option>';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        async function loadEarnings() {
+            try {
+                var response = await fetch('/api/dashboard/doctor/', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                
+                if (response.ok) {
+                    var data = await response.json();
+                    document.getElementById('totalEarnings').textContent = '$' + (data.monthly_revenue || 0);
+                    document.getElementById('monthEarningsCard').textContent = '$' + (data.monthly_revenue || 0);
+                    document.getElementById('pendingPayments').textContent = '$0';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        function renderAppointments(appointments, elementId) {
+            var html = '';
+            for (var i = 0; i < appointments.length; i++) {
+                var apt = appointments[i];
+                var statusClass = 'badge-warning';
+                if (apt.status === 'completed') statusClass = 'badge-success';
+                if (apt.status === 'cancelled') statusClass = 'badge-danger';
+                
+                html += '<div class="card mb-2">' +
+                    '<div class="card-body">' +
+                        '<div class="d-flex justify-content-between">' +
+                            '<div>' +
+                                '<h6>' + (apt.patient_name || 'Patient') + '</h6>' +
+                                '<small class="text-muted">' + apt.reason + '</small><br>' +
+                                '<small><i class="far fa-clock"></i> ' + new Date(apt.appointment_date).toLocaleString() + '</small>' +
+                            '</div>' +
+                            '<div>' +
+                                '<span class="badge ' + statusClass + '">' + apt.status + '</span>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+            }
+            
+            if (appointments.length === 0) {
+                html = '<p class="text-muted">No appointments found</p>';
+            }
+            
+            document.getElementById(elementId).innerHTML = html;
+        }
+        
+        function renderPatients(patients) {
+            var html = '<table class="table table-striped"><thead><tr><th>Name</th><th>Last Visit</th><th>Total Visits</th><th>Action</th></tr></thead><tbody>';
+            
+            for (var i = 0; i < patients.length; i++) {
+                var p = patients[i];
+                html += '<tr>' +
+                    '<td>' + p.name + '</td>' +
+                    '<td>' + new Date(p.last_visit).toLocaleDateString() + '</td>' +
+                    '<td>' + p.appointments + '</td>' +
+                    '<td><button class="btn btn-sm btn-primary">View Profile</button></td>' +
+                '</tr>';
+            }
+            
+            html += '</tbody></table>';
+            
+            if (patients.length === 0) {
+                html = '<p class="text-muted">No patients found</p>';
+            }
+            
+            document.getElementById('patientsList').innerHTML = html;
+        }
+        
+        function addMedicine() {
+            var container = document.getElementById('medicinesContainer');
+            var html = '<div class="row mb-2 medicine-row">' +
+                '<div class="col-md-3"><input type="text" class="form-control" placeholder="Medicine Name" required></div>' +
+                '<div class="col-md-2"><input type="text" class="form-control" placeholder="Dosage" required></div>' +
+                '<div class="col-md-2"><select class="form-select"><option value="1-0-0">Morning</option><option value="0-1-0">Afternoon</option><option value="0-0-1">Night</option><option value="1-1-1">3 Times</option></select></div>' +
+                '<div class="col-md-2"><input type="text" class="form-control" placeholder="Duration" required></div>' +
+                '<div class="col-md-2"><input type="text" class="form-control" placeholder="Instructions"></div>' +
+                '<div class="col-md-1"><button type="button" class="btn btn-danger" onclick="removeMedicine(this)"><i class="fas fa-times"></i></button></div>' +
+            '</div>';
+            container.insertAdjacentHTML('beforeend', html);
+        }
+        
+        function removeMedicine(btn) {
+            btn.closest('.medicine-row').remove();
+        }
+        
+        document.getElementById('prescriptionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var messageDiv = document.getElementById('prescriptionMessage');
+            
+            var medicines = [];
+            var rows = document.querySelectorAll('.medicine-row');
+            for (var i = 1; i < rows.length; i++) {
+                var inputs = rows[i].querySelectorAll('input, select');
+                medicines.push({
+                    name: inputs[0].value,
+                    dosage: inputs[1].value,
+                    frequency: inputs[2].value,
+                    duration: inputs[3].value,
+                    instructions: inputs[4].value
+                });
+            }
+            
+            var prescriptionData = {
+                patient: document.getElementById('prescriptionPatient').value,
+                appointment: document.getElementById('prescriptionAppointment').value || null,
+                symptoms: document.getElementById('symptoms').value,
+                diagnosis: document.getElementById('diagnosis').value,
+                notes: document.getElementById('prescriptionNotes').value,
+                follow_up_date: document.getElementById('followUpDate').value || null,
+                medicines: medicines
+            };
+            
+            try {
+                var response = await fetch('/api/prescriptions/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + accessToken
+                    },
+                    body: JSON.stringify(prescriptionData)
+                });
+                
+                var data = await response.json();
+                
+                if (response.ok) {
+                    messageDiv.innerHTML = '<div class="alert alert-success mt-3">Prescription saved successfully!</div>';
+                    document.getElementById('prescriptionForm').reset();
+                } else {
+                    messageDiv.innerHTML = '<div class="alert alert-danger mt-3">' + JSON.stringify(data) + '</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="alert alert-danger mt-3">Error: ' + error.message + '</div>';
+            }
+        });
+        
+        loadDoctorDashboard();
+    </script>
+</body>
+</html>
