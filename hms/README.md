@@ -40,7 +40,32 @@ python manage.py runserver
 
 - **Home**: http://127.0.0.1:8000/
 - **Login**: http://127.0.0.1:8000/login/
-- **Admin**: http://127.0.0.1:8000/admin/
+- **Patient Dashboard**: http://127.0.0.1:8000/patient-dashboard/
+- **Doctor Dashboard**: http://127.0.0.1:8000/doctor-dashboard/
+- **Admin Dashboard**: http://127.0.0.1:8000/admin-dashboard/
+- **Django Admin**: http://127.0.0.1:8000/admin/
+
+## Running on Windows (CMD)
+
+```
+cmd
+:: Install dependencies
+cd c:\Users\vaish\Downloads\hms
+pip install -r requirements.txt
+
+:: Run migrations
+cd hms
+python manage.py migrate
+
+:: Create superuser
+python manage.py createsuperuser
+
+:: Run development server
+python manage.py runserver
+
+:: Run with Gunicorn (production)
+gunicorn hms.wsgi:application --bind 0.0.0.0:8000
+```
 
 ## Deploy to Render.com (Free 24/7)
 
