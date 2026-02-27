@@ -1,1 +1,1 @@
-web: gunicorn hms.wsgi:application --log-file - --log-level debug
+web: gunicorn hms.hms.wsgi:application --log-file - --log-level debug
